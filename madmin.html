@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        
+        .dashboard {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .history-btn {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        
+        .history-btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .shop-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .shop-box {
+            width: 100%;
+            max-width: 480px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .shop-box h3 {
+            margin-top: 0;
+        }
+        
+        .product-list {
+            margin-top: 15px;
+        }
+        
+        .shop-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .shop-table th,
+        .shop-table td {
+            padding: 8px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+        
+        .shop-table th {
+            background-color: #f4f4f4;
+        }
+        
+        .delivery-status {
+            text-align: center;
+        }
+        
+        .delivery-status button {
+            padding: 5px 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        
+        .delivery-status button:hover {
+            background-color: #218838;
+        }
+        /* Hide History section by default */
+        
+        .history-table {
+            display: none;
+        }
+        
+        .status-btns {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .delivered-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .yet-to-deliver-btn {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .delivered-btn:hover {
+            background-color: #218838;
+        }
+        
+        .yet-to-deliver-btn:hover {
+            background-color: #e67e22;
+        }
+        
+        .delivered {
+            color: green;
+        }
+        /* Styling for the history box */
+        
+        .history-box {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .history-box h3 {
+            text-align: center;
+        }
+        
+        .history-table th {
+            text-align: center;
+        }
+        
+        .history-table td {
+            text-align: center;
+        }
+        /* Button for clearing history */
+        
+        .clear-history-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: none;
+        }
+        
+        .clear-history-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Admin Dashboard</h1>
+
+    <div class="dashboard">
+        <button class="history-btn" onclick="toggleHistory()">History</button>
+
+        <h2>Shop and Product Details</h2>
+
+        <div class="shop-container" id="shopContainer">
+            <!-- Dynamic Shop Data will be added here -->
+        </div>
+
+        <!-- History Box (Hidden by default) -->
+        <div class="history-box" id="historyBox">
+            <h3>Delivered Orders History</h3>
+            <div class="shop-container" id="historyContainer">
+                <!-- Dynamic History Data will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear History Button (Fixed at bottom-right, visible when in history) -->
+    <button class="clear-history-btn" onclick="clearHistory()">Clear History</button>
+
+    <script>
+        // Function to load all shop and product data
+        function loadDashboardData() {
+            const allShopData = JSON.parse(localStorage.getItem('shopDetailsList')) || [];
+            const remainingShops = [];
+
+            // Process each shop's products
+            allShopData.forEach(shop => {
+                let shopDelivered = true;
+                shop.products.forEach(product => {
+                    if (product.delivered) {
+                        // Remove product if delivered
+                    } else {
+                        shopDelivered = false;
+                    }
+                });
+
+                // Only keep shop if not all products are delivered
+                if (!shopDelivered) {
+                    remainingShops.push(shop);
+                }
+            });
+
+            // Display remaining shops
+            const shopContainer = document.getElementById('shopContainer');
+            shopContainer.innerHTML = remainingShops.map(shop => `
+                <div class="shop-box">
+                    <h3>${shop.shopName}</h3>
+                    <p><strong>Address:</strong> ${shop.shopAddress}</p>
+                    <p><strong>Phone:</strong> ${shop.phone}</p>
+                    <div class="product-list">
+                        <h4>Products</h4>
+                        <table class="shop-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${shop.products.map(product => `
+                                    <tr>
+                                        <td>${product.productName}</td>
+                                        <td>${product.quantity}</td>
+                                        <td>${product.date}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="delivery-status">
+                        ${shop.products.every(product => product.delivered) ? 
+                            '<p>All products delivered</p>' :
+                            '<button onclick="markShopDelivered(\'' + shop.shopName + '\')">Mark  as Delivered</button>'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Function to mark a shop's products as delivered
+        function markShopDelivered(shopName) {
+            let allShopData = JSON.parse(localStorage.getItem('shopDetailsList')) || [];
+            allShopData.forEach(shop => {
+                if (shop.shopName === shopName) {
+                    shop.products.forEach(product => {
+                        product.delivered = true;
+                    });
+                }
+            });
+
+            // Save updated shop data back to localStorage
+            localStorage.setItem('shopDetailsList', JSON.stringify(allShopData));
+
+            // Refresh the page to show updated data
+            loadDashboardData();
+        }
+
+        // Function to show or hide the history
+        function toggleHistory() {
+            const historyBox = document.getElementById('historyBox');
+            const shopContainer = document.getElementById('shopContainer');
+            const clearHistoryBtn = document.querySelector('.clear-history-btn');
+
+            if (historyBox.style.display === "" || historyBox.style.display === "none") {
+                historyBox.style.display = "block";
+                shopContainer.style.display = "none";
+                clearHistoryBtn.style.display = "block";
+
+                // Populate history data (delivered orders)
+                const allShopData = JSON.parse(localStorage.getItem('shopDetailsList')) || [];
+                const deliveredShops = allShopData.filter(shop => {
+                    return shop.products.every(product => product.delivered);
+                });
+
+                const historyContainer = document.getElementById('historyContainer');
+                historyContainer.innerHTML = deliveredShops.map(shop => `
+                    <div class="shop-box">
+                        <h3>${shop.shopName}</h3>
+                        <p><strong>Address:</strong> ${shop.shopAddress}</p>
+                        <p><strong>Phone:</strong> ${shop.phone}</p>
+                        <div class="product-list">
+                            <h4>Products</h4>
+                            <table class="shop-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${shop.products.map(product => `
+                                        <tr>
+                                            <td>${product.productName}</td>
+                                            <td>${product.quantity}</td>
+                                            <td>${product.date}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                historyBox.style.display = "none";
+                shopContainer.style.display = "block";
+                clearHistoryBtn.style.display = "none";
+            }
+        }
+
+        // Function to clear history data
+        function clearHistory() {
+            localStorage.removeItem('shopDetailsList');
+            alert("History cleared!");
+            location.reload();
+        }
+
+        // Load data when the page loads
+        loadDashboardData();
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop and Product Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        input,
+        button,
+        table {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        input {
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        table {
+            border-collapse: collapse;
+        }
+        
+        table th,
+        table td {
+            border: 1px solid #ccc;
+            text-align: left;
+            padding: 8px;
+        }
+        
+        .add-product-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .add-product-btn:hover {
+            background-color: #218838;
+        }
+        
+        .action-buttons button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .action-buttons button:hover {
+            background-color: #0056b3;
+        }
+        
+        datalist {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .remove-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        
+        .remove-btn:hover {
+            background-color: #c82333;
+        }
+        /* Adjusting product name, quantity, and date input fields */
+        
+        td input {
+            width: 120px;
+            /* Reduced width for input fields */
+            padding: 5px;
+            /* Reduced padding */
+            font-size: 14px;
+            /* Reduced font size */
+        }
+    </style>
+</head>
+
+<body>
+
+    <form id="shopForm">
+        <h2>Enter Shop and Product Details</h2>
+        <label for="shopName">Shop Name:</label>
+        <input type="text" id="shopName" name="shopName" placeholder="Enter the shop name" required>
+
+        <label for="shopAddress">Shop Address:</label>
+        <input type="text" id="shopAddress" name="shopAddress" placeholder="Enter the shop address" required>
+
+        <label for="phone">Your Phone Number:</label>
+        <input type="tel" id="phone" name="phone" placeholder="Enter your 10-digit phone number" required>
+
+        <h3>Product Details</h3>
+        <table id="productTable">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Quantity</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Product rows will be added here dynamically -->
+            </tbody>
+        </table>
+        <button type="button" class="add-product-btn" onclick="addProductRow()">Add Product</button>
+
+        <div class="action-buttons">
+            <button type="button" onclick="saveDetails()">Submit Details</button>
+        </div>
+    </form>
+
+    <script>
+        // Predefined list of product suggestions
+        const productSuggestions = [
+            "Apple",
+            "Banana",
+            "Orange",
+            "Grapes",
+            "Milk",
+            "Eggs",
+            "Bread",
+            "Butter",
+            "Cheese",
+            "Chicken"
+        ];
+
+        // Function to add a new row for product details
+        function addProductRow() {
+            const tableBody = document.getElementById('productTable').querySelector('tbody');
+            const row = document.createElement('tr');
+
+            const dataListId = `productSuggestions_${tableBody.children.length}`;
+
+            row.innerHTML = `
+                <td>
+                    <input type="text" name="productName[]" placeholder="Enter product name" list="${dataListId}" oninput="updateSuggestions(this)" required>
+                    <datalist id="${dataListId}">
+                        ${productSuggestions.map(suggestion => `<option value="${suggestion}"></option>`).join('')}
+                    </datalist>
+                </td>
+                <td><input type="number" name="quantity[]" placeholder="Enter quantity" min="1" required></td>
+                <td><input type="date" name="date[]" required></td>
+                <td><button type="button" class="remove-btn" onclick="removeProductRow(this)">Remove</button></td>
+            `;
+            tableBody.appendChild(row);
+        }
+
+        // Function to remove a product row
+        function removeProductRow(button) {
+            const row = button.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
+
+        // Function to update product suggestions dynamically
+        function updateSuggestions(input) {
+            const value = input.value.toLowerCase();
+            const dataList = input.nextElementSibling;
+            const filteredSuggestions = productSuggestions
+                .filter(suggestion => suggestion.toLowerCase().includes(value))
+                .sort((a, b) => a.toLowerCase().indexOf(value) - b.toLowerCase().indexOf(value));
+
+            dataList.innerHTML = filteredSuggestions.map(suggestion => `<option value="${suggestion}"></option>`).join('');
+        }
+
+        // Function to save shop and product details
+        function saveDetails() {
+            const shopName = document.getElementById('shopName').value.trim();
+            const shopAddress = document.getElementById('shopAddress').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+
+            if (!shopName || !shopAddress || !phone) {
+                alert("Please fill out shop details before submitting.");
+                return;
+            }
+
+            const phoneRegex = /^\d{10}$/;
+            if (!phoneRegex.test(phone)) {
+                alert("Please enter a valid 10-digit phone number.");
+                return;
+            }
+
+            const productRows = document.querySelectorAll('#productTable tbody tr');
+            if (productRows.length === 0) {
+                alert("Please add at least one product.");
+                return;
+            }
+
+            const products = [];
+            productRows.forEach(row => {
+                const productName = row.querySelector('input[name="productName[]"]').value.trim();
+                const quantity = row.querySelector('input[name="quantity[]"]').value;
+                const date = row.querySelector('input[name="date[]"]').value;
+
+                if (!productName || !quantity || !date) {
+                    alert("Please fill out all product details.");
+                    return;
+                }
+
+                products.push({ productName, quantity, date });
+            });
+
+            const shopData = {
+                shopName,
+                shopAddress,
+                phone,
+                products,
+                timestamp: new Date().toISOString()
+            };
+
+            const allShopData = JSON.parse(localStorage.getItem('shopDetailsList')) || [];
+            allShopData.push(shopData);
+
+            localStorage.setItem('shopDetailsList', JSON.stringify(allShopData));
+
+            alert("Details saved successfully!");
+
+            // Clear form after saving
+            document.getElementById('shopForm').reset();
+            document.getElementById('productTable').querySelector('tbody').innerHTML = '';  // Clear product rows
+        }
+    </script>
+
+</body>
+
+</html>
