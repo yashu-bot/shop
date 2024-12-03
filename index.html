@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        .message {
+            color: red;
+            font-size: 14px;
+        }
+        
+        .hide {
+            display: none;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        
+        .change-password-link {
+            color: #007BFF;
+            text-decoration: underline;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        
+        .change-password-link:hover {
+            color: #0056b3;
+        }
+        
+        .back-link {
+            color: #007BFF;
+            text-decoration: underline;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        
+        .back-link:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- User Login Form -->
+    <div class="container" id="loginForm">
+        <h2>User Login</h2>
+        <input type="text" id="username" placeholder="Enter Username" required>
+        <input type="password" id="password" placeholder="Enter Password" required>
+        <div class="button-container">
+            <button onclick="userLogin()">Login</button>
+            <button onclick="showAdminLogin()">Admin Login</button>
+        </div>
+        <p class="message" id="loginMessage"></p>
+
+        <button class="change-password-link" onclick="showChangePasswordForm()">Change Password</button>
+    </div>
+
+    <!-- Change Password Form -->
+    <div class="container hide" id="changePasswordForm">
+        <h2>Change Password</h2>
+        <input type="text" id="changeUsername" placeholder="Enter Username" required>
+        <input type="password" id="changeCurrentPassword" placeholder="Enter Current Password" required>
+        <input type="password" id="newPassword" placeholder="New Password" required>
+        <input type="password" id="confirmPassword" placeholder="Confirm New Password" required>
+        <button onclick="changePassword()">Change Password</button>
+        <p class="message" id="passwordMessage"></p>
+        <button class="back-link" onclick="showUserLogin()">Back to Login</button>
+    </div>
+
+    <!-- Admin Login Form -->
+    <div class="container hide" id="adminLoginForm">
+        <h2>Admin Login</h2>
+        <input type="text" id="adminUsername" placeholder="Enter Admin Username" required>
+        <input type="password" id="adminPassword" placeholder="Enter Admin Password" required>
+        <div class="button-container">
+            <button onclick="adminLogin()">Login</button>
+        </div>
+        <p class="message" id="adminLoginMessage"></p>
+        <button class="back-link" onclick="showUserLogin()">Back to User Login</button>
+    </div>
+
+    <script>
+        // Predefined users and admin credentials
+        const users = [{
+            username: 'worker1',
+            password: 'password1'
+        }, {
+            username: 'worker2',
+            password: 'password2'
+        }, {
+            username: 'worker3',
+            password: 'password3'
+        }, {
+            username: 'worker4',
+            password: 'password4'
+        }, {
+            username: 'worker5',
+            password: 'password5'
+        }];
+
+        const admin = {
+            username: 'admin',
+            password: 'admin123'
+        };
+
+        // User login function
+        function userLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const message = document.getElementById('loginMessage');
+
+            const loggedInUser = users.find(user => user.username === username && user.password === password);
+
+            if (loggedInUser) {
+                // Redirect to user page
+                window.location.href = "muser.html";
+            } else {
+                message.textContent = "Invalid username or password!";
+            }
+        }
+
+        // Admin login function
+        function adminLogin() {
+            const adminUsername = document.getElementById('adminUsername').value.trim();
+            const adminPassword = document.getElementById('adminPassword').value.trim();
+            const message = document.getElementById('adminLoginMessage');
+
+            if (adminUsername === admin.username && adminPassword === admin.password) {
+                // Redirect to admin page
+                window.location.href = "madmin.html";
+            } else {
+                message.textContent = "Invalid admin credentials!";
+            }
+        }
+
+        // Change password function
+        function changePassword() {
+            const changeUsername = document.getElementById('changeUsername').value.trim();
+            const currentPassword = document.getElementById('changeCurrentPassword').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value.trim();
+            const message = document.getElementById('passwordMessage');
+
+            const user = users.find(user => user.username === changeUsername);
+
+            if (!user) {
+                message.textContent = "Username not found!";
+                return;
+            }
+
+            if (user.password !== currentPassword) {
+                message.textContent = "Current password is incorrect!";
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                message.textContent = "New passwords do not match!";
+                return;
+            }
+
+            // Update the password for the user
+            user.password = newPassword;
+            message.textContent = "Password changed successfully!";
+            message.style.color = 'green';
+
+            // Redirect to login form
+            setTimeout(() => {
+                alert("Your password has been changed. Please log in again.");
+                showUserLogin();
+            }, 1000);
+        }
+
+        // Show admin login form
+        function showAdminLogin() {
+            document.getElementById('loginForm').classList.add('hide');
+            document.getElementById('adminLoginForm').classList.remove('hide');
+        }
+
+        // Show user login form
+        function showUserLogin() {
+            document.getElementById('loginForm').classList.remove('hide');
+            document.getElementById('adminLoginForm').classList.add('hide');
+            document.getElementById('changePasswordForm').classList.add('hide');
+        }
+
+        // Show change password form
+        function showChangePasswordForm() {
+            document.getElementById('loginForm').classList.add('hide');
+            document.getElementById('changePasswordForm').classList.remove('hide');
+        }
+    </script>
+
+</body>
+
+</html>
