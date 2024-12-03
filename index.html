@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        .message {
+            color: red;
+            font-size: 14px;
+        }
+        
+        .hide {
+            display: none;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        
+        .change-password-link {
+            color: #007BFF;
+            text-decoration: underline;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        
+        .change-password-link:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container" id="loginForm">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Enter Username" required>
+        <input type="password" id="password" placeholder="Enter Password" required>
+        <div class="button-container">
+            <button onclick="login()">Login</button>
+        </div>
+        <p class="message" id="loginMessage"></p>
+
+        <!-- Change Password as an underlined text -->
+        <button class="change-password-link" onclick="showChangePasswordForm()">Change Password</button>
+    </div>
+
+    <div class="container hide" id="changePasswordForm">
+        <h2>Change Password</h2>
+        <input type="text" id="changeUsername" placeholder="Enter Username" required>
+        <input type="password" id="changeCurrentPassword" placeholder="Enter Current Password" required>
+        <input type="password" id="newPassword" placeholder="New Password" required>
+        <input type="password" id="confirmPassword" placeholder="Confirm New Password" required>
+        <button onclick="changePassword()">Change Password</button>
+        <p class="message" id="passwordMessage"></p>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        // Predefined users with username and password
+        const users = [{
+            username: 'worker1',
+            password: 'password1'
+        }, {
+            username: 'worker2',
+            password: 'password2'
+        }, {
+            username: 'worker3',
+            password: 'password3'
+        }, {
+            username: 'worker4',
+            password: 'password4'
+        }, {
+            username: 'worker5',
+            password: 'password5'
+        }];
+
+        let loggedInUser = null;
+
+        // Login function
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const message = document.getElementById('loginMessage');
+
+            loggedInUser = users.find(user => user.username === username && user.password === password);
+
+            if (loggedInUser) {
+                // Successful login, redirect to user.html
+                window.location.href = "muser.html"; // Change this to the actual user page URL
+            } else {
+                message.textContent = "Invalid username or password!";
+            }
+        }
+
+        // Show the Change Password form
+        function showChangePasswordForm() {
+            document.getElementById('loginForm').classList.add('hide');
+            document.getElementById('changePasswordForm').classList.remove('hide');
+        }
+
+        // Change password function
+        function changePassword() {
+            const changeUsername = document.getElementById('changeUsername').value.trim();
+            const currentPassword = document.getElementById('changeCurrentPassword').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value.trim();
+            const message = document.getElementById('passwordMessage');
+
+            const user = users.find(user => user.username === changeUsername);
+
+            if (!user) {
+                message.textContent = "Username not found!";
+                return;
+            }
+
+            if (user.password !== currentPassword) {
+                message.textContent = "Current password is incorrect!";
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                message.textContent = "New passwords do not match!";
+                return;
+            }
+
+            // Update the password for the user
+            user.password = newPassword;
+            message.textContent = "Password changed successfully!";
+            message.style.color = 'green';
+
+            // After successful password change, prompt the user to log in again
+            setTimeout(() => {
+                alert("Your password has been changed. Please log in again.");
+                logout(); // Automatically log out the user and return to the login page
+            }, 1000);
+        }
+
+        // Logout function
+        function logout() {
+            document.getElementById('loginForm').classList.remove('hide');
+            document.getElementById('changePasswordForm').classList.add('hide');
+            document.getElementById('loginMessage').textContent = '';
+            document.getElementById('passwordMessage').textContent = '';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            loggedInUser = null;
+        }
+    </script>
+
+</body>
+
+</html>
